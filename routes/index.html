@@ -5,6 +5,9 @@
 		<title>CSE 198: Project</title>
 		<author>Michael Chin</author>
 	
+		<!-- Raleway -->
+		<link href='http://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
+		
 		<!-- Leaflet -->
 		<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
 		<script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
@@ -15,6 +18,7 @@
 
 		<style type="text/css">
 			body {
+				font-family: 'Raleway', sans-serif;
 				background: #95a5a6;
 			}
 
@@ -28,21 +32,100 @@
 				margin-top: 10px;
 				padding: 20px;
 			}
+			
+			#vertical-pane {
+				position: relative;
+				z-index: 3;
+				float: right;
+				height: 600px;
+				width: 250px;
+				padding: 10px 0px 10px 0px;
+				background-color: rgba(189, 195, 199, 0.6);
+			}
+			
+			#name {
+				text-align: center;
+				font-size: 30px;
+			}
+			
+			#pie svg {
+				display: block;
+				margin-left: auto;
+				margin-right: auto;
+			}
+			
+			#click {
+				text-align: center;
+				background: #95a5a6;
+				height: 25px;
+				width: 100px;
+				margin-left: auto;
+				margin-right: auto;
+				margin-top: 100px;
+				line-height: 25px;
+				font-size: 15px;
+				cursor: pointer;
+			}
 		</style>
 	</head>
 	<body>
 		<!-- Map -->
-		<div id="map"></div>
+		<div id="map">
+			
+			<div id="vertical-pane">
+				<div id="name">Region Name</div>
+				<div id="pie">
+				</div>
+				<div id="click" onclick="updateSort()">
+					Update Map
+				</div>
+			</div>
+		</div>
 		<!-- Information -->
 		<div id="info">
-		<div id="pie">
-		</div>
+		
 </div>
 
 		<script type="text/javascript">
+			
+			/*
+			 * 
+			 * I have to make all of my data changes in the ajax success -- apply all postgres then
+			 * I cannot create a local storage of the mapdata or else GG no re
+			 * -- system dies
+			 * 
+			 */
+			
+			//Create Map
+			var map = L.map('map').setView([32.796968,-117.102807], 13);
+			addMapbox();
+			createLayer();
+			
+		var myLayer;
+		var mapData = [];
 		
+		function showMapData() {
+			console.log("PRINT MAP DATA-----");
+			console.log(mapData);
+		}
 		
-		
+		function updateSort() {
+			//map.removeLayer(myLayer);
+			myLayer.clearLayers();
+			//change props
+			if(mapData.properties.popupContent == "La Jolla") {
+				mapData.properties.class = "B";
+			}
+			
+			createLayer();
+			myLayer.addData(mapData);
+			console.log("About to print map data");
+		}
+
+function addData(data) {
+	//showMapData();
+	myLayer.addData(data);
+}
 
 		function addStyle(feature) {
 			var arraySize = Math.ceil(Math.random()*8);
@@ -52,31 +135,31 @@
 		//popup = new L.Popup();
 
 		function updateInfo(name) {
-			//$('#info').html(name);
+			$('#name').html(name);
 			pieUpdate(name);
-			pie2Update(name);
 			
 		}
 
 		function onEachFeature(feature, layer) {
-		// does this feature have a property named popupContent?
-		if (feature.properties && feature.properties.popupContent) {
-		layer.bindPopup(feature.properties.popupContent);
-		layer.on("click", function (e) {
-		var name = feature.properties.popupContent;
-		updateInfo(name);
-		});
-		}
+			// does this feature have a property named popupContent?
+			if (feature.properties && feature.properties.popupContent) {
+			layer.bindPopup(feature.properties.popupContent);
+			layer.on("click", function (e) {
+			var name = feature.properties.popupContent;
+			updateInfo(name);
+			});
+			}
 		}
 
-		var map = L.map('map').setView([32.796968,-117.102807], 13);
-
+		
+function addMapbox() {
 		L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
 		attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
 		maxZoom: 18,
 		id: 'itrinitron.m79d7eg8',
 		accessToken: 'pk.eyJ1IjoiaXRyaW5pdHJvbiIsImEiOiJ6NGNZaXVBIn0.1dTPdhyoMAUHkjX9wVl4eQ'
 		}).addTo(map);
+	}
 		
 		var myStyle = {
     "color": "#ff7800",
@@ -84,15 +167,19 @@
     "opacity": 0.65
 };
 
-		var myLayer = L.geoJson(false, {
+
+	function createLayer() {
+		myLayer = L.geoJson(false, {
 			style: function(feature) {
 				switch (feature.properties.class) {
-					case 'A': return {color: "#ff0000", weight: 1};
+					case 'A': return {color: "#ff0000", weight: 1}; break;
+					case 'B': return {color: "#00ff00", weight: 1}; break;
 					default:   return {color: "#0000ff", weight: 1};
 				}
 			},
 			onEachFeature: onEachFeature
 		}).addTo(this.map);
+	}
 
 		/*
 		map.on('click', function(e) {        
@@ -104,28 +191,35 @@
 		}); */
 
 
+
 		$.ajax({
 		dataType: "json",
 		url: "mapGeo/sandiego",
 		success: function(data) {
-		$(data.features).each(function(key, data) {
-		//add data to map
-			if(data.properties.popupContent == "La Jolla") {
-				data.properties.class = "A";
-			}
-		myLayer.addData(data);
-		});
+			$(data.features).each(function(key, data) {
+
+			//add data to map
+				if(data.properties.popupContent == "La Jolla") {
+					data.properties.class = "A";
+				}
+
+				mapData.push(data);
+				addData(mapData); 
+				//myLayer.addData(data);
+			});
 
 		}
-		}).error(function() {});
+		}).error(function() {}); 
+		
+
 
 		</script>
 		
 		<script>
-		var w = 450;
-var h = 300;
-var r = 100;
-var ir = 45;
+		var w = 200;
+var h = 100;
+var r = 50; //radius
+var ir = 0; //inner-radius
 var textOffset = 14;
 var tweenDuration = 250;
 
@@ -160,7 +254,7 @@ var streakerDataAdded;
 
 function fillArray() {
   return {
-    port: "English",
+    port: "", //label
     octetTotalCount: Math.ceil(Math.random()*(arrayRange))
   };
 }
@@ -203,18 +297,20 @@ var whiteCircle = center_group.append("svg:circle")
   .attr("r", ir);
 
 // "TOTAL" LABEL
+/*
 var totalLabel = center_group.append("svg:text")
   .attr("class", "label")
   .attr("dy", -15)
   .attr("text-anchor", "middle") // text-align: right
-  .text("TOTAL");
+  .text("TOTAL"); */
 
-//TOTAL TRAFFIC VALUE
+/*
+//TOTAL TRAFFIC VALUE /
 var totalValue = center_group.append("svg:text")
   .attr("class", "total")
   .attr("dy", 7)
   .attr("text-anchor", "middle") // text-align: right
-  .text("Waiting...");
+  .text("Waiting..."); 
 
 //UNITS LABEL
 var totalUnits = center_group.append("svg:text")
@@ -222,7 +318,7 @@ var totalUnits = center_group.append("svg:text")
   .attr("dy", 21)
   .attr("text-anchor", "middle") // text-align: right
   .text("kb");
-
+*/
 
 ///////////////////////////////////////////////////////////
 // STREAKER CONNECTION ////////////////////////////////////
@@ -252,11 +348,12 @@ function pieUpdate() {
     //REMOVE PLACEHOLDER CIRCLE
     arc_group.selectAll("circle").remove();
 
+/*
     totalValue.text(function(){
       var kb = totalOctets/1024;
       return kb.toFixed(1);
       //return bchart.label.abbreviated(totalOctets*8);
-    });
+    }); */
 
     //DRAW ARC PATHS
     paths = arc_group.selectAll("path").data(filteredPieData);
