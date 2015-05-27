@@ -162,9 +162,7 @@
 						$(data.features).each(function(key, data) {
 
 						//add data to map
-							if(data.properties.popupContent == "La Jolla") {
-								data.properties.class = "A";
-							}
+							data.properties.selected = false;
 
 							addData(mapData); 
 							myLayer.addData(data);
