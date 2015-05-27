@@ -29,9 +29,61 @@ pg.connect(conString, function(err, client, done) {
   });
 });
 
+var query = ' \
+SELECT "SRA", "Area", "Speak only English (age>=5)" as english, "Speak Spanish -total (age>=5)" as spanish, "Speak API lang -total (age>=5)" as asian \
+FROM hhsa_san_diego_demographics_languages_2012 ORDER BY "SRA"';
+
+var employQuery = ' \
+SELECT "SRA", "Total in labor force (residents)" as employed, "Total Armed Forces (residents)" as military, "Total not in labor force (residents)" as unemployed \
+FROM hhsa_san_diego_demographics_employment_status_2012 ORDER BY "SRA"';
+
+
+
+var infoQ = "SELECT attrelid::regclass, attnum, attname \
+FROM   pg_attribute \
+WHERE  attrelid = 'hhsa_san_diego_demographics_languages_2012'::regclass \
+AND    attnum > 0 \
+AND    NOT attisdropped \
+ORDER  BY attnum;" 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
   res.send('respond with a resource');
+});
+
+router.get('/language', function(req, res) {
+	pg.connect(conString, function(err, client, done) {
+	  if(err) {
+		return console.error('error fetching client from pool', err);
+	  }
+	  client.query(query, function(err, result) {
+		//call `done()` to release the client back to the pool
+		done();
+
+		if(err) {
+		  return console.error('error running query', err);
+		}
+		res.json(result.rows);
+		//output: 1
+	  });
+	});
+});
+
+router.get('/employment', function(req, res) {
+	pg.connect(conString, function(err, client, done) {
+	  if(err) {
+		return console.error('error fetching client from pool', err);
+	  }
+	  client.query(employQuery, function(err, result) {
+		//call `done()` to release the client back to the pool
+		done();
+
+		if(err) {
+		  return console.error('error running query', err);
+		}
+		res.json(result.rows);
+		//output: 1
+	  });
+	});
 });
 
 module.exports = router;

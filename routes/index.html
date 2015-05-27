@@ -23,7 +23,7 @@
 			}
 
 			#map { 
-				height: 600px; 
+				height: 900px; 
 			}
 			#info { 
 				height: 260px;
@@ -37,7 +37,7 @@
 				position: relative;
 				z-index: 3;
 				float: right;
-				height: 600px;
+				height: 900px;
 				width: 250px;
 				padding: 10px 0px 10px 0px;
 				background-color: rgba(189, 195, 199, 0.6);
@@ -66,6 +66,20 @@
 				font-size: 15px;
 				cursor: pointer;
 			}
+			
+			#hor-bar {
+				width: 90%;
+				margin-left: auto;
+				margin-right: auto;
+				height: 30px;
+				background: #e74c3c;
+				margin-top: 20px;
+			}
+			
+			#hor-bar .mini-bar {
+				height: 30px;
+				float: left;
+			}
 		</style>
 	</head>
 	<body>
@@ -76,17 +90,90 @@
 				<div id="name">Region Name</div>
 				<div id="pie">
 				</div>
+				<div id="hor-bar">
+					<div class="mini-bar"></div>
+				</div>
 				<div id="click" onclick="updateSort()">
 					Update Map
 				</div>
 			</div>
 		</div>
-		<!-- Information -->
-		<div id="info">
-		
-</div>
 
 		<script type="text/javascript">
+			<!-- Load the database in -->
+			//http://localhost:3000/db/language
+			var localDB = [];
+			loadData();
+			var data;
+			var currentSRA;
+			
+			
+			//Create Map
+			var map = L.map('map').setView([32.796968,-117.102807], 13);
+			addMapbox();
+			createLayer();
+			loadMap();
+			
+			var myLayer;
+			var mapData = [];
+			
+			function loadData() {
+				$.ajax({
+					dataType: "json",
+					url: "db/language",
+					success: function(data) {
+						$(data).each(function(key, data) {
+							if(localDB[data.SRA]) {
+								localDB[data.SRA]["language"] = data
+							}
+							else {
+								localDB[data.SRA] = [];
+								localDB[data.SRA]["language"] = data
+							}
+						});
+					}
+				}).error(function() {}); 
+				
+				
+				$.ajax({
+					dataType: "json",
+					url: "db/employment",
+					success: function(data) {
+						$(data).each(function(key, data) {
+							if(localDB[data.SRA]) {
+								localDB[data.SRA]["employment"] = data
+							}
+							else {
+								localDB[data.SRA] = [];
+								localDB[data.SRA]["employment"] = data
+							}
+						});
+					}
+				}).error(function() {}); 
+			}
+			
+			
+			
+			function loadMap() {
+				$.ajax({
+					dataType: "json",
+					url: "mapGeo/sandiego",
+					success: function(data) {
+						$(data.features).each(function(key, data) {
+
+						//add data to map
+							if(data.properties.popupContent == "La Jolla") {
+								data.properties.class = "A";
+							}
+
+							addData(mapData); 
+							myLayer.addData(data);
+						});
+
+					}
+				}).error(function() {}); 
+			}
+			
 			
 			/*
 			 * 
@@ -96,13 +183,7 @@
 			 * 
 			 */
 			
-			//Create Map
-			var map = L.map('map').setView([32.796968,-117.102807], 13);
-			addMapbox();
-			createLayer();
 			
-		var myLayer;
-		var mapData = [];
 		
 		function showMapData() {
 			console.log("PRINT MAP DATA-----");
@@ -134,20 +215,27 @@ function addData(data) {
 		}
 		//popup = new L.Popup();
 
-		function updateInfo(name) {
-			$('#name').html(name);
-			pieUpdate(name);
+		/* WHEN WE CLICK THE MAP */
+		function updateInfo(name, sra) {
+			$('#name').html(sra + ": " + name);
+			currentSRA = sra;
+
+			
+			
+			boxUpdate();
+			pieUpdate();
 			
 		}
 
 		function onEachFeature(feature, layer) {
 			// does this feature have a property named popupContent?
 			if (feature.properties && feature.properties.name) {
-			layer.bindPopup(feature.properties.name);
-			layer.on("click", function (e) {
-			var name = feature.properties.name;
-			updateInfo(name);
-			});
+				layer.bindPopup(feature.properties.name);
+				layer.on("click", function (e) {
+					var name = feature.properties.name;
+					var sra = feature.properties.SRA;
+					updateInfo(name, sra);
+				});
 			}
 		}
 
@@ -191,24 +279,35 @@ function addMapbox() {
 		}); */
 
 
-
-		$.ajax({
-		dataType: "json",
-		url: "mapGeo/sandiego",
-		success: function(data) {
-			$(data.features).each(function(key, data) {
-
-			//add data to map
-				if(data.properties.popupContent == "La Jolla") {
-					data.properties.class = "A";
-				}
-
-				addData(mapData); 
-				myLayer.addData(data);
-			});
-
-		}
-		}).error(function() {}); 
+// MY PERSONAL BAR LINE
+//<div class="mini-bar"></div>
+	//console.log(localDB[sra]["employment"])
+	
+	function boxUpdate() {
+		//Calculate the numbers
+		var e = localDB[currentSRA]["employment"].employed;
+		var ue  = localDB[currentSRA]["employment"].unemployed;
+		var m = localDB[currentSRA]["employment"].military;
+		total = e + ue + m;
+		
+		//employed, military, unemployed
+		w1 = Math.ceil(e/total * 100);
+		w2 = Math.floor(m/total * 100); 
+		w3 = Math.floor(ue/total * 100);
+		
+		console.log(total);
+		
+		b1 = "#2ecc71";
+		b2 = "#9b59b6";
+		b3 = "#e74c3c";
+	
+		$('#hor-bar').html(' \
+			<div class="mini-bar" style=" width: ' + w1 + '%; background: ' + b1 + ';"></div> \
+			<div class="mini-bar" style=" width: ' + w2 + '%; background: ' + b2 + ';"></div> \
+			<div class="mini-bar" style=" width: ' + w3 + '%; background: ' + b3 + ';"></div> \
+		');
+		
+	}
 		
 
 
@@ -322,14 +421,35 @@ var totalUnits = center_group.append("svg:text")
 ///////////////////////////////////////////////////////////
 // STREAKER CONNECTION ////////////////////////////////////
 ///////////////////////////////////////////////////////////
-
+dataCounter = -1;
+function fillData() {
+	dataCounter++;
+	if(dataCounter == 0) {
+		return {
+			port: "English",
+			octetTotalCount: localDB[currentSRA]["language"].english
+		};
+	}
+	else if(dataCounter == 1) {
+		return {
+			port: "Spanish",
+			octetTotalCount: localDB[currentSRA]["language"].spanish
+		};
+	}
+	else if(dataCounter == 2) {
+		return {
+			port: "Asian",
+			octetTotalCount: localDB[currentSRA]["language"].asian
+		};
+	}
+}
 
 // to run each time data is generated
 function pieUpdate() {
 
-  arraySize = Math.ceil(Math.random()*4);
-  streakerDataAdded = d3.range(arraySize).map(fillArray);
-
+  arraySize = 3
+  streakerDataAdded = d3.range(arraySize).map(fillData);
+  dataCounter = -1;
   oldPieData = filteredPieData;
   pieData = donut(streakerDataAdded);
 
