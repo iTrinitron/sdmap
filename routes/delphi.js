@@ -3,12 +3,12 @@ var router = express.Router();
 var pg = require('pg');
 
 var user = "wic";
-var pw= "l03jven/?iwk+";
+var pw= "m0kei3u$jh*_2";
 var server= "delphidata.ucsd.edu";
 var port= "5432";
 var db= "delphibetadb";
 
-var conString = "postgres://" + user + ":" + pw + "@" + server + ":" + port + "/" + db;
+var conString = "postgres://" + user + ":" + pw + "@" + server + "/" + db;
 
 //this starts initializes a connection pool
 //it will keep idle connections open for a (configurable) 30 seconds

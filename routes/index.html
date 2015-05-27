@@ -113,7 +113,7 @@
 			//map.removeLayer(myLayer);
 			myLayer.clearLayers();
 			//change props
-			if(mapData.properties.popupContent == "La Jolla") {
+			if(mapData.properties.name == "La Jolla") {
 				mapData.properties.class = "B";
 			}
 			
@@ -142,10 +142,10 @@ function addData(data) {
 
 		function onEachFeature(feature, layer) {
 			// does this feature have a property named popupContent?
-			if (feature.properties && feature.properties.popupContent) {
-			layer.bindPopup(feature.properties.popupContent);
+			if (feature.properties && feature.properties.name) {
+			layer.bindPopup(feature.properties.name);
 			layer.on("click", function (e) {
-			var name = feature.properties.popupContent;
+			var name = feature.properties.name;
 			updateInfo(name);
 			});
 			}
@@ -203,9 +203,8 @@ function addMapbox() {
 					data.properties.class = "A";
 				}
 
-				mapData.push(data);
 				addData(mapData); 
-				//myLayer.addData(data);
+				myLayer.addData(data);
 			});
 
 		}
