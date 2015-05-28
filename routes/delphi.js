@@ -1,3 +1,8 @@
+/*
+ * 
+ * URL: /db
+ */
+
 var express = require('express');
 var router = express.Router();
 var pg = require('pg');
@@ -29,27 +34,30 @@ pg.connect(conString, function(err, client, done) {
   });
 });
 
+/*
+ * hhsa_san_diego_demographics_languages_2012
+ * 
+ */
 var query = ' \
 SELECT "SRA", "Area", "Speak only English (age>=5)" as english, "Speak Spanish -total (age>=5)" as spanish, "Speak API lang -total (age>=5)" as asian \
 FROM hhsa_san_diego_demographics_languages_2012 ORDER BY "SRA"';
 
+/*
+ * hhsa_san_diego_demographics_employment_status_2012
+ * 
+ */
 var employQuery = ' \
 SELECT "SRA", "Total in labor force (residents)" as employed, "Total Armed Forces (residents)" as military, "Total not in labor force (residents)" as unemployed \
 FROM hhsa_san_diego_demographics_employment_status_2012 ORDER BY "SRA"';
 
-
-
-var infoQ = "SELECT attrelid::regclass, attnum, attname \
-FROM   pg_attribute \
-WHERE  attrelid = 'hhsa_san_diego_demographics_languages_2012'::regclass \
-AND    attnum > 0 \
-AND    NOT attisdropped \
-ORDER  BY attnum;" 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
   res.send('respond with a resource');
 });
 
+/*
+ * URL: /db/employment
+ */
 router.get('/language', function(req, res) {
 	pg.connect(conString, function(err, client, done) {
 	  if(err) {
@@ -68,6 +76,9 @@ router.get('/language', function(req, res) {
 	});
 });
 
+/*
+ * URL: /db/employment
+ */
 router.get('/employment', function(req, res) {
 	pg.connect(conString, function(err, client, done) {
 	  if(err) {

@@ -4,7 +4,8 @@ var path = require("path");
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
-  res.sendFile(path.join(__dirname + '/index.html'));
+	//Send the HTML file on access
+	res.sendFile(path.join(__dirname + '/index.html'));
 });
 
 module.exports = router;
