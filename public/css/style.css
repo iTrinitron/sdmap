@@ -1,0 +1,63 @@
+body {
+	font-family: 'Raleway', sans-serif;
+	background: #95a5a6;
+}
+
+#map { 
+	height: 900px; 
+}
+#info { 
+	height: 260px;
+	background: #bdc3c7;
+	border-radius: 30px;
+	margin-top: 10px;
+	padding: 20px;
+}
+
+#vertical-pane {
+	position: relative;
+	z-index: 3;
+	float: right;
+	height: 900px;
+	width: 250px;
+	padding: 10px 0px 10px 0px;
+	background-color: rgba(189, 195, 199, 0.6);
+}
+
+#name {
+	text-align: center;
+	font-size: 30px;
+}
+
+#pie svg {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#click {
+	text-align: center;
+	background: #95a5a6;
+	height: 25px;
+	width: 100px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 100px;
+	line-height: 25px;
+	font-size: 15px;
+	cursor: pointer;
+}
+
+#hor-bar {
+	width: 90%;
+	margin-left: auto;
+	margin-right: auto;
+	height: 30px;
+	background: #e74c3c;
+	margin-top: 20px;
+}
+
+#hor-bar .mini-bar {
+	height: 30px;
+	float: left;
+}
