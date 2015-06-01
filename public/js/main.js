@@ -1,9 +1,12 @@
-<!-- Load the database in -->
+/* Load the database to a local variable */
 //Local Database to store all variables
 var localDB = [];
 loadData();
 var data;
 var currentSRA;
+var lastLayer = 0;
+
+var vPane = new VerticalPane("#vertical-pane");
 
 
 //Create Map
@@ -13,7 +16,6 @@ createLayer();
 loadMap();
 
 var myLayer;
-var mapData = [];
 
 function loadData() {
 	$.ajax({
@@ -61,8 +63,6 @@ function loadMap() {
 
 			//add data to map
 				data.properties.selected = false;
-
-				addData(mapData); 
 				myLayer.addData(data);
 			});
 
@@ -79,22 +79,61 @@ function loadMap() {
  * 
  */
 
-
-
-function showMapData() {
-console.log("PRINT MAP DATA-----");
-console.log(mapData);
+/*
+ * mapOnClick
+ * 
+ * When you click a layer on the map...
+ */
+function mapOnClick(feature) {
+	var name = feature.properties.name;
+	var sra = feature.properties.SRA;
+	
+	vPane.updateRName(name);
+	currentSRA = sra;
+	boxUpdate();
+	pieUpdate();
 }
+
+//I DONT even know anymore T_T
+function highlightSRA(e) {
+	
+	if(lastLayer !== 0) {
+		myLayer.resetStyle(lastLayer);
+	}
+	
+	var layer = e.target;
+
+	layer.setStyle({
+			weight: 5,
+			color: 'blue',
+			dashArray: '',
+			fillOpacity: 0.7
+	});
+
+	if (!L.Browser.ie && !L.Browser.opera) {
+			layer.bringToFront();
+	}
+	console.log(layer);
+	lastLayer = layer;
+}
+
+function resetHighlight(e) {
+	//console.log(e);
+    myLayer.resetStyle(e.target);
+}
+
+//ASDFASD
 
 function updateSort() {
 //map.removeLayer(myLayer);
-myLayer.clearLayers();
+//myLayer.clea
+//rLayers();
 //change props
-if(mapData.properties.name == "La Jolla") {
+if(mapData.properties.name === "La Jolla") {
 	mapData.properties.class = "B";
 }
 
-createLayer();
+
 myLayer.addData(mapData);
 console.log("About to print map data");
 }
@@ -111,28 +150,21 @@ return { "weight": 1, "color": fillColor};
 }
 //popup = new L.Popup();
 
-/* WHEN WE CLICK THE MAP */
-function updateInfo(name, sra) {
-$('#name').html(sra + ": " + name);
-currentSRA = sra;
-
-
-
-boxUpdate();
-pieUpdate();
-
-}
-
 function onEachFeature(feature, layer) {
-// does this feature have a property named popupContent?
-if (feature.properties && feature.properties.name) {
-	layer.bindPopup(feature.properties.name);
-	layer.on("click", function (e) {
-		var name = feature.properties.name;
-		var sra = feature.properties.SRA;
-		updateInfo(name, sra);
-	});
-}
+	// does this feature have a property named popupContent?
+	if (feature.properties && feature.properties.name) {
+		layer.bindPopup(feature.properties.name);
+		//Bind the features to the onclick function
+	
+		layer.on("click", function (e) {
+			mapOnClick(feature);
+			highlightSRA(e);
+		}); 
+
+
+
+
+	}
 }
 
 
@@ -153,16 +185,17 @@ var myStyle = {
 
 
 function createLayer() {
-myLayer = L.geoJson(false, {
-style: function(feature) {
-	switch (feature.properties.class) {
-		case 'A': return {color: "#ff0000", weight: 1}; break;
-		case 'B': return {color: "#00ff00", weight: 1}; break;
-		default:   return {color: "#0000ff", weight: 1};
-	}
-},
-onEachFeature: onEachFeature
-}).addTo(this.map);
+	myLayer = L.geoJson(false, {
+			style: function(feature) {
+				switch (feature.properties.class) {
+					case 'A': return {color: "#ff0000", weight: 1}; break;
+					case 'B': return {color: "#00ff00", weight: 1}; break;
+					default:   return {color: "#0000ff", weight: 1};
+				}
+			},
+			onEachFeature: onEachFeature
+		}
+	).addTo(this.map);
 }
 
 /*
