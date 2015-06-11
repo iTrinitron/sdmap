@@ -18,18 +18,54 @@ var lastLayer = 0;
 
 var vPane = new VerticalPane("#vertical-pane");
 
-options = [ 
-		{"key": "college_student", "value": "college_student"},
-		{"key": "median", "value": "median"}
-	];
-addHeatOptions(options);
+
+addHeatOptions(heatMapOptions);
 
 
 loadMap();
 
+var geomjsonFeature = {
+    "type": "Feature",
+    "properties": {
+        "name": "Coors Field",
+        "amenity": "Baseball Stadium",
+        "popupContent": "This is where the Rockies play!"
+    },
+    "geometry": {
+        "type": "Point",
+        "coordinates": [-117.238,32.881]
+    }
+};
 
+L.geoJson(geomjsonFeature).addTo(map);
+var geomjsonFeature = {
+    "type": "Feature",
+    "properties": {
+        "name": "Coors Field",
+        "amenity": "Baseball Stadium",
+        "popupContent": "This is where the Rockies play!"
+    },
+    "geometry": {
+        "type": "Point",
+        "coordinates": [-117.072222,32.775278]
+    }
+};
 
+L.geoJson(geomjsonFeature).addTo(map);
+var geomjsonFeature = {
+    "type": "Feature",
+    "properties": {
+        "name": "Coors Field",
+        "amenity": "Baseball Stadium",
+        "popupContent": "This is where the Rockies play!"
+    },
+    "geometry": {
+        "type": "Point",
+        "coordinates": [-117.1875,32.771111]
+    }
+};
 
+L.geoJson(geomjsonFeature).addTo(map);
 
 
 
@@ -49,37 +85,14 @@ loadMap();
 function mapOnClick(feature) {
 	var name = feature.properties.name;
 	var sra = feature.properties.SRA;
-	
 	vPane.updateRName(name);
 	currentSRA = sra;
 	boxUpdate();
 	pieUpdate();
 }
 
-//I DONT even know anymore T_T
-function highlightSRA(e) {
-	console.log(e.target);
-	if(lastLayer !== 0) {
-		myLayer.resetStyle(lastLayer);
-	}
-	
-	var layer = e.target;
-
-	layer.setStyle({
-			weight: 5,
-			color: 'blue',
-			dashArray: '',
-			fillOpacity: 0.7
-	});
-
-	if (!L.Browser.ie && !L.Browser.opera) {
-			layer.bringToFront();
-	}
-	lastLayer = layer;
-}
 
 function resetHighlight(e) {
-	//console.log(e);
     myLayer.resetStyle(e.target);
 }
 
@@ -99,27 +112,10 @@ return { "weight": 1, "color": fillColor};
 }
 //popup = new L.Popup();
 
-function onEachFeature(feature, layer) {
-	// does this feature have a property named popupContent?
-	if (feature.properties && feature.properties.name) {
-		layer.bindPopup(feature.properties.name);
-		//Bind the features to the onclick function
-	
-		layer.on("click", function (e) {
-			mapOnClick(feature);
-			highlightSRA(e);
-		}); 
-	}
-}
 
 
 
 
-var myStyle = {
-"color": "#ff7800",
-"weight": 1,
-"opacity": 0.65
-};
 
 
 
@@ -127,30 +123,33 @@ var myStyle = {
 
 // MY PERSONAL BAR LINE
 //<div class="mini-bar"></div>
-//console.log(localDB[sra]["employment"])
 
 function boxUpdate() {
-//Calculate the numbers
-var e = localDB[currentSRA].employed;
-var ue  = localDB[currentSRA].unemployed;
-var m = localDB[currentSRA].military;
-total = e + ue + m;
+	//Calculate the numbers
+	var e = localDB[currentSRA].employed;
+	var ue  = localDB[currentSRA].unemployed;
+	var m = localDB[currentSRA].military;
+	total = e + ue + m;
 
-//employed, military, unemployed
-w1 = Math.ceil(e/total * 100);
-w2 = Math.floor(m/total * 100); 
-w3 = Math.floor(ue/total * 100);
+	//employed, military, unemployed
+	w1 = Math.ceil(e/total * 100);
+	w2 = Math.floor(m/total * 100); 
+	w3 = Math.floor(ue/total * 100);
+	
+	b1 = "#2ecc71";
+	b2 = "#9b59b6";
+	b3 = "#e74c3c";
 
-console.log(total);
-
-b1 = "#2ecc71";
-b2 = "#9b59b6";
-b3 = "#e74c3c";
-
-$('#hor-bar').html(' \
-<div class="mini-bar" style=" width: ' + w1 + '%; background: ' + b1 + ';"></div> \
-<div class="mini-bar" style=" width: ' + w2 + '%; background: ' + b2 + ';"></div> \
-<div class="mini-bar" style=" width: ' + w3 + '%; background: ' + b3 + ';"></div> \
-');
-
+	$('#hor-bar').html(' \
+	<div class="mini-bar" style=" width: ' + w1 + '%; background: ' + b1 + ';"></div> \
+	<div class="mini-bar" style=" width: ' + w2 + '%; background: ' + b2 + ';"></div> \
+	<div class="mini-bar" style=" width: ' + w3 + '%; background: ' + b3 + ';"></div> \
+	');
+	
+	//Add in the median house value
+	if(localDB[currentSRA]["median"] !== null) {
+		$("#home-value").html(commaSeparateNumber(localDB[currentSRA]["median"]));
+	}
+	
+	generateBarHelper();
 }

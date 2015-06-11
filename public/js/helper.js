@@ -10,7 +10,7 @@ function loadData() {
 			$(data['delphiData']).each(function(key, row) {
 				localDB[row["SRA"]] = row
 			});
-			localDB['max'] = data['delphiMaxData'][0];l
+			localDB['max'] = data['delphiMaxData'][0];
 		}
 	}).error(function() {}); 
 }
@@ -50,9 +50,11 @@ function createLayer() {
 	return L.geoJson(false, {
 			style: function(feature) {
 				switch (feature.properties.class) {
-					case 'A': return {color: "#ff0000", weight: 1}; break;
-					case 'B': return {color: "#00ff00", weight: 1}; break;
-					default:   return {color: "#0000ff", weight: 1};
+					default:   return {
+							fillColor: MAP_DEFAULT_FILL_COLOR,
+							color: MAP_DEFAULT_COLOR, 
+							weight: MAP_DEFAULT_WEIGHT
+					};
 				}
 			},
 			onEachFeature: onEachFeature
@@ -81,15 +83,56 @@ function updateMapClick() {
  */
 function updateHeat(col) {
 	myLayer.eachLayer(function(layer) {
-		var sra = layer.feature.properties.SRA
-		var percent = localDB[sra][col] / localDB['max'][col];
-		console.log(localDB['max'][col]);
-		console.log(percent);
-		percent = round(percent, 2);
-		
 		layer.setStyle({
-			fillOpacity: percent
+			fillOpacity: calculatePercent(col, layer.feature.properties.SRA)
 		});
+	});
+}
+
+/*
+ * Calculate percentage for the heat map intensity
+ */
+function calculatePercent(col, sra) {
+	var percent = 0;
+	switch(calculateMethod[col]) {
+		case 2: 
+			percent = localDB[sra][col] / (localDB[sra]['unemployed']+localDB[sra]['employed']) / (localDB['max'][col] * 1.2);
+			break;
+		default:
+			percent = localDB[sra][col] / (localDB['max'][col]*1.2);
+			break;
+	}
+	
+
+	return round(percent, 2);
+}
+
+
+/*
+ * Highlight a selected SRA 
+ */
+function highlightSRA(e) {
+	if(lastLayer !== 0) {
+		resetStyle(lastLayer);
+	}
+	
+	var layer = e.target;
+
+	layer.setStyle({
+			weight: MAP_HIGHLIGHT_WEIGHT,
+			color: MAP_HIGHLIGHT_COLOR
+	});
+
+	if (!L.Browser.ie && !L.Browser.opera) {
+			layer.bringToFront();
+	}
+	lastLayer = layer;
+}
+
+function resetStyle(layer) {
+	layer.setStyle({
+			weight: MAP_DEFAULT_WEIGHT,
+			color: MAP_DEFAULT_COLOR
 	});
 }
 
@@ -107,3 +150,71 @@ function addHeatOptions(options) {
          .text(value['value'])); 
 	});
 }
+
+/*
+ * Function called every time data is added to the map
+ */
+function onEachFeature(feature, layer) {
+	// does this feature have a property named popupContent?
+	if (feature.properties && feature.properties.name) {
+		//layer.bindPopup(feature.properties.name);
+		
+		//Bind the features to the onclick function
+		layer.on("click", function (e) {
+			mapOnClick(feature);
+			highlightSRA(e);
+		}); 
+	}
+}
+
+/*
+ * Separates a number into the US comma format
+ */
+function commaSeparateNumber(val){
+	while (/(\d+)(\d{3})/.test(val.toString())){
+		val = val.toString().replace(/(\d+)(\d{3})/, '$1'+','+'$2');
+	}
+	return val;
+}
+
+/*
+ * Process the data required to genereate the bar graph
+ */
+function generateBarHelper() {
+	var n = 1; //Number of layers in the stacked bar graph
+	//Array of columns from localDB
+	var cols = ["professional", 
+	"entertainment", 
+	"industry",
+	"financial",
+	"social",
+	"communication",
+	"commercial"];
+	//Number of Columns
+	var m = cols.length;
+	
+	//Iterate and create the array
+	var datum = [];
+	for(var i=0; i<n; ++i) {
+		datum[i] = [];
+		for(var j=0; j<m; ++j) {
+			datum[i].push({"x": j, "y": localDB[currentSRA][cols[j]]});
+		}
+	}
+	
+	generateBar(n, m, datum);
+}
+
+	/*
+	return customArray = [
+					[
+					{"x": 0, "y": 4},
+	{"x": 1, "y": 4},
+	{"x": 2, "y": 5},
+	{"x": 3, "y": 6}],
+		[
+					{"x": 0, "y": 4},
+	{"x": 1, "y": 5},
+	{"x": 2, "y": 6},
+	{"x": 3, "y": 7}
+		]]; */
