@@ -111,19 +111,19 @@ function fillData() {
 	if(dataCounter == 0) {
 		return {
 			port: "English",
-			octetTotalCount: localDB[currentSRA]["language"].english
+			octetTotalCount: localDB[currentSRA].english
 		};
 	}
 	else if(dataCounter == 1) {
 		return {
 			port: "Spanish",
-			octetTotalCount: localDB[currentSRA]["language"].spanish
+			octetTotalCount: localDB[currentSRA].spanish
 		};
 	}
 	else if(dataCounter == 2) {
 		return {
 			port: "Asian",
-			octetTotalCount: localDB[currentSRA]["language"].asian
+			octetTotalCount: localDB[currentSRA].asian
 		};
 	}
 }

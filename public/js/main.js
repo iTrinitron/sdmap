@@ -2,73 +2,35 @@
 //Local Database to store all variables
 var localDB = [];
 loadData();
-var data;
+
+//Current SRA that is selected
 var currentSRA;
-var lastLayer = 0;
-
-var vPane = new VerticalPane("#vertical-pane");
-
 
 //Create Map
 var map = L.map('map').setView([32.796968,-117.102807], 13);
 addMapbox();
-createLayer();
+
+var myLayer = createLayer();
+myLayer.addTo(this.map);
+
+
+var lastLayer = 0;
+
+var vPane = new VerticalPane("#vertical-pane");
+
+options = [ 
+		{"key": "college_student", "value": "college_student"},
+		{"key": "median", "value": "median"}
+	];
+addHeatOptions(options);
+
+
 loadMap();
 
-var myLayer;
-
-function loadData() {
-	$.ajax({
-		dataType: "json",
-		url: "db/language",
-		success: function(data) {
-			$(data).each(function(key, data) {
-				if(localDB[data.SRA]) {
-					localDB[data.SRA]["language"] = data
-				}
-				else {
-					localDB[data.SRA] = [];
-					localDB[data.SRA]["language"] = data
-				}
-			});
-		}
-	}).error(function() {}); 
-	
-	
-	$.ajax({
-		dataType: "json",
-		url: "db/employment",
-		success: function(data) {
-			$(data).each(function(key, data) {
-				if(localDB[data.SRA]) {
-					localDB[data.SRA]["employment"] = data
-				}
-				else {
-					localDB[data.SRA] = [];
-					localDB[data.SRA]["employment"] = data
-				}
-			});
-		}
-	}).error(function() {}); 
-}
 
 
 
-function loadMap() {
-	$.ajax({
-		dataType: "json",
-		url: "mapGeo/sandiego",
-		success: function(data) {
-			$(data.features).each(function(key, data) {
 
-			//add data to map
-				data.properties.selected = false;
-				myLayer.addData(data);
-			});
-
-		}
-	}).error(function() {}); 
-}
 
 
 /*
@@ -96,7 +58,7 @@ function mapOnClick(feature) {
 
 //I DONT even know anymore T_T
 function highlightSRA(e) {
-	
+	console.log(e.target);
 	if(lastLayer !== 0) {
 		myLayer.resetStyle(lastLayer);
 	}
@@ -113,7 +75,6 @@ function highlightSRA(e) {
 	if (!L.Browser.ie && !L.Browser.opera) {
 			layer.bringToFront();
 	}
-	console.log(layer);
 	lastLayer = layer;
 }
 
@@ -124,19 +85,7 @@ function resetHighlight(e) {
 
 //ASDFASD
 
-function updateSort() {
-//map.removeLayer(myLayer);
-//myLayer.clea
-//rLayers();
-//change props
-if(mapData.properties.name === "La Jolla") {
-	mapData.properties.class = "B";
-}
 
-
-myLayer.addData(mapData);
-console.log("About to print map data");
-}
 
 function addData(data) {
 //showMapData();
@@ -160,22 +109,11 @@ function onEachFeature(feature, layer) {
 			mapOnClick(feature);
 			highlightSRA(e);
 		}); 
-
-
-
-
 	}
 }
 
 
-function addMapbox() {
-L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-maxZoom: 18,
-id: 'itrinitron.m79d7eg8',
-accessToken: 'pk.eyJ1IjoiaXRyaW5pdHJvbiIsImEiOiJ6NGNZaXVBIn0.1dTPdhyoMAUHkjX9wVl4eQ'
-}).addTo(map);
-}
+
 
 var myStyle = {
 "color": "#ff7800",
@@ -184,28 +122,7 @@ var myStyle = {
 };
 
 
-function createLayer() {
-	myLayer = L.geoJson(false, {
-			style: function(feature) {
-				switch (feature.properties.class) {
-					case 'A': return {color: "#ff0000", weight: 1}; break;
-					case 'B': return {color: "#00ff00", weight: 1}; break;
-					default:   return {color: "#0000ff", weight: 1};
-				}
-			},
-			onEachFeature: onEachFeature
-		}
-	).addTo(this.map);
-}
 
-/*
-map.on('click', function(e) {        
-var popLocation= e.latlng;
-var popup = L.popup()
-.setLatLng(popLocation)
-.setContent('<p>Hello world!<br />This is a nice popup.</p>')
-.openOn(map);        
-}); */
 
 
 // MY PERSONAL BAR LINE
@@ -214,9 +131,9 @@ var popup = L.popup()
 
 function boxUpdate() {
 //Calculate the numbers
-var e = localDB[currentSRA]["employment"].employed;
-var ue  = localDB[currentSRA]["employment"].unemployed;
-var m = localDB[currentSRA]["employment"].military;
+var e = localDB[currentSRA].employed;
+var ue  = localDB[currentSRA].unemployed;
+var m = localDB[currentSRA].military;
 total = e + ue + m;
 
 //employed, military, unemployed
