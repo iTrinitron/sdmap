@@ -1,11 +1,9 @@
-function generateBar(n, m, datum) {
+function generateBar(n, m, datum, legend) {
 	$("#chart").html("");
 
 	//var n = 1, // number of layers
 	//		m = 4; // number of samples per layer
 
-	console.log(datum);
-	console.log(stream_layers(n, m, .1));
 
 	var nextColor = 0;
 
@@ -13,9 +11,9 @@ function generateBar(n, m, datum) {
 			data = d3.layout.stack()(datum);
 			//color = d3.interpolateRgb(colorList);
 
-	var p = 20,
-			w = 250, //width of graph
-			h = 300 - .5 - p, //height of graph
+	var p = 180,
+			w = 330, //width of graph
+			h = 420 - .5 - p, //height of graph
 			mx = m,
 			my = d3.max(data, function(d) {
 				return d3.max(d, function(d) {
@@ -36,18 +34,18 @@ function generateBar(n, m, datum) {
 		.append("svg:svg")
 			.attr("width", w)
 			.attr("height", h + p);
-
+			
 	var layers = vis.selectAll("g.layer")
 			.data(data)
-		.enter().append("svg:g")
+			.enter().append("svg:g")
 			//.style("fill", function(d, i) { return color(i / (n - 1)); })
-			.style("fill", function(d, i) { return colorList[nextColor++]; })
 			.attr("class", "layer");
 
 	var bars = layers.selectAll("g.bar")
 			.data(function(d) { return d; })
-		.enter().append("svg:g")
+			.enter().append("svg:g")
 			.attr("class", "bar")
+			.style("fill", function(d, i) { return colorList[nextColor++]; })
 			.attr("transform", function(d) { return "translate(" + x(d) + ",0)"; });
 
 	bars.append("svg:rect")
@@ -58,18 +56,18 @@ function generateBar(n, m, datum) {
 		.transition()
 			.delay(function(d, i) { return i * 10; })
 			.attr("y", y1)
-			.attr("height", function(d) { return y0(d) - y1(d); });
+			.attr("height", function(d) { return y0(d) - y1(d); })
 
 	var labels = vis.selectAll("text.label")
 			.data(data[0])
-		.enter().append("svg:text")
-			.attr("class", "label")
+			.enter().append("svg:text")
+			.attr("class", "label vertical-text")
 			.attr("x", x)
-			.attr("y", h + 6)
+			.attr("y", h)
 			.attr("dx", x({x: .45}))
 			.attr("dy", ".71em")
-			.attr("text-anchor", "middle")
-			.text(function(d, i) { return "hi"; }); //THE LEGEND OF THE X AXIS
+			.attr("text-anchor", "right")
+			.text(function(d, i) { return legend[i]; }); //THE LEGEND OF THE X AXIS
 
 	vis.append("svg:line")
 			.attr("x1", 0)

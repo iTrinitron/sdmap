@@ -6,6 +6,7 @@ loadData();
 //Current SRA that is selected
 var currentSRA;
 
+
 //Create Map
 var map = L.map('map').setView([32.796968,-117.102807], 13);
 addMapbox();
@@ -136,14 +137,16 @@ function boxUpdate() {
 	w2 = Math.floor(m/total * 100); 
 	w3 = Math.floor(ue/total * 100);
 	
-	b1 = "#2ecc71";
-	b2 = "#9b59b6";
-	b3 = "#e74c3c";
+	if(w1+w2+w3 < 100) {
+		w3++;
+	}
+	
+
 
 	$('#hor-bar').html(' \
-	<div class="mini-bar" style=" width: ' + w1 + '%; background: ' + b1 + ';"></div> \
-	<div class="mini-bar" style=" width: ' + w2 + '%; background: ' + b2 + ';"></div> \
-	<div class="mini-bar" style=" width: ' + w3 + '%; background: ' + b3 + ';"></div> \
+	<div class="mini-bar" style=" width: ' + w1 + '%; background: ' + EMPLOYED_BG_COLOR + ';"></div> \
+	<div class="mini-bar" style=" width: ' + w2 + '%; background: ' + UNEMPLOYED_BG_COLOR + ';"></div> \
+	<div class="mini-bar" style=" width: ' + w3 + '%; background: ' + MILITARY_BG_COLOR + ';"></div> \
 	');
 	
 	//Add in the median house value

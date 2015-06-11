@@ -41,6 +41,7 @@ function addMapbox() {
 		id: 'itrinitron.m79d7eg8',
 		accessToken: 'pk.eyJ1IjoiaXRyaW5pdHJvbiIsImEiOiJ6NGNZaXVBIn0.1dTPdhyoMAUHkjX9wVl4eQ'
 	}).addTo(map);
+	$(".leaflet-bottom").remove(); //ADD THIS LICENSE BACK IN SOMEWHERE
 }
 
 /*
@@ -75,6 +76,12 @@ function round(num, places) {
  */
 function updateMapClick() {
 	updateHeat($('#heat').val());
+}
+
+function resetHeatMap() {
+	myLayer.eachLayer(function(layer) {
+		myLayer.resetStyle(layer);
+	});
 }
 
 
@@ -167,6 +174,8 @@ function onEachFeature(feature, layer) {
 	}
 }
 
+var selectedChart = DEFAULT_CHART;
+console.log(selectedChart);
 /*
  * Separates a number into the US comma format
  */
@@ -177,33 +186,40 @@ function commaSeparateNumber(val){
 	return val;
 }
 
+$('#chart-selector span').click(function() {
+	//Reset
+	$('#chart-selector span').css('font-weight', 'normal');
+	$(this).css('font-weight', 'bold');
+	selectedChart = $(this).attr('id');
+	generateBarHelper();
+});
+
 /*
  * Process the data required to genereate the bar graph
  */
 function generateBarHelper() {
 	var n = 1; //Number of layers in the stacked bar graph
 	//Array of columns from localDB
-	var cols = ["professional", 
-	"entertainment", 
-	"industry",
-	"financial",
-	"social",
-	"communication",
-	"commercial"];
+	console.log(selectedChart);
+	var cols = dataCategory[selectedChart];
 	//Number of Columns
 	var m = cols.length;
-	
+	var legend = []
 	//Iterate and create the array
 	var datum = [];
 	for(var i=0; i<n; ++i) {
 		datum[i] = [];
 		for(var j=0; j<m; ++j) {
 			datum[i].push({"x": j, "y": localDB[currentSRA][cols[j]]});
+			legend.push(dataName[cols[j]]);
 		}
 	}
 	
-	generateBar(n, m, datum);
+	console.log(legend);
+	
+	generateBar(n, m, datum, legend);
 }
+
 
 	/*
 	return customArray = [

@@ -3,7 +3,6 @@
 	<head>
 		<meta charset="utf-8">
 		<title>CSE 198: Project</title>
-		<author>Michael Chin</author>
 	
 		<!-- Raleway -->
 		<link href='http://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
@@ -19,24 +18,42 @@
 	<body>
 		<!-- Map -->
 		<div id="map">
-			
+			<div id="name-background"></div>
+			<div id="name">Region Name</div>
 			<div id="vertical-pane">
-				<div id="name">Region Name</div>
 				<div id="pie">
 				</div>
+				<div id="hor-bar-title">Employment Percentages</div>
 				<div id="hor-bar">
 					<div class="mini-bar"></div>
 				</div>
-				<div id="click" onclick="updateMapClick()">
-					Update Map
+				<div id="hor-bar-legend">
+					<span id="employed-legend">Employed</span>  | 
+					<span id="unemployed-legend">Unemployed</span> | 
+					<span id="military-legend">Military</span>
 				</div>
-				<div id="heatt">
+				<div id="heat-selector">
 					<select id="heat">
-						
 					</select>
 				</div>
+				<div id="heat-buttons">
+					<div id="resetHeat" onclick="resetHeatMap()">
+						Reset Map
+					</div>
+					<div id="enableHeat" onclick="updateMapClick()">
+						Enable Heat Map
+					</div>
+					<div class="clear"></div>
+				</div>
 				<div id="median-home">
-					The average home costs $<span id="home-value"></span>
+					The average home in this region costs:
+				</div>
+				<div id="median-home-value">
+					$<span id="home-value">0</span>
+				</div>
+				<div id="chart-selector">
+					<div id="title">Region Demographics</div>
+					<span id="education">Education</span> | <span id="occupation">Occupation</span>
 				</div>
 				<div class='gallery' id='chart'>
 					

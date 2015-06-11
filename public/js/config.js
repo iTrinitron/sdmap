@@ -10,26 +10,16 @@ var MAP_HIGHLIGHT_WEIGHT = 3;
 
 var BAR_GRAPH_COLOR = "#556";
 
-heatMapOptions = [ 
-		//Percent Normal
-		{"key": "college_student", "value": "college_student"},
-		{"key": "median", "value": "median"},
-		{"key": "english", "value": "English Speakers"},
-		{"key": "spanish", "value": "Spanish Speakers"},
-		{"key": "asian", "value": "Asian Speakers"},
-		{"key": "professional", "value": "Professional Workers"},
-		{"key": "entertainment", "value": "Entertainment Workers"},
-		{"key": "financial", "value": "Financial Workers"},
-		{"key": "social", "value": "Social Workers"},
-		{"key": "communication", "value": "Communication Workers"},
-		{"key": "commercial", "value": "Commercial Workers"},
-		{"key": "industry", "value": "Industrial Workers"},
-		{"key": "military", "value": "Military Citizens"},
-		//
-		{"key": "unemployed", "value": "Unemployed Citizens"},
-		{"key": "employed", "value": "Employed Citizens"}
-	];
-	
+var EMPLOYED_BG_COLOR = "#2ecc71";
+var UNEMPLOYED_BG_COLOR = "#9b59b6";
+var MILITARY_BG_COLOR = "#e74c3c";
+
+var DEFAULT_CHART = 'occupation';
+
+$("#employed-legend").css('color',EMPLOYED_BG_COLOR);
+$("#unemployed-legend").css('color',UNEMPLOYED_BG_COLOR);
+$("#military-legend").css('color',MILITARY_BG_COLOR);
+
 var calculateMethod = {
 	"asian": 1,
 	"english": 1, 
@@ -45,10 +35,14 @@ var calculateMethod = {
 	"communication": 1,
 	"commercial": 1,
 	"unemployed": 2, 
-	"employed": 2
+	"employed": 2,
+	"uneducated": 1,
+	"ged": 1,
+	"community": 1,
+	"university": 1
 };
 
-colorList = (
+var colorList = [
 	"#40d47e",
 	"#3498db",
 	"#9b59b6",
@@ -56,4 +50,47 @@ colorList = (
 	"#16a085",
 	"#2980b9",
 	"#e74c3c"
-);
+];
+
+var dataName = {
+	"college_student": "College Students",
+	"median": "Median Home Value",
+	"english": "English Speakers",
+	"spanish": "Spanish Speakers",
+	"asian": "Asian Speakers",
+	"professional": "Professional Workers",
+	"entertainment": "Entertainment Workers",
+	"financial": "Financial Workers",
+	"social": "Social Workers",
+	"communication": "Communication Workers",
+	"commercial": "Commercial Workers",
+	"industry": "Industrial Workers",
+	"military": "Military Citizens",
+	"unemployed": "Unemployed Citizens",
+	"employed": "Employed Citizens",
+	"uneducated": "Uneducated Citizens",
+	"ged": "High-school Graduates",
+	"community": "Associate Graduates",
+	"university": "University Graduates"
+};
+
+//Create a key-map version
+var heatMapOptions = [];
+for(var key in dataName) {
+    heatMapOptions.push({"key": key, "value": dataName[this.key]})
+}
+
+var dataCategory = {};
+dataCategory['occupation'] = ["professional", 
+	"entertainment", 
+	"industry",
+	"financial",
+	"social",
+	"communication",
+	"commercial"];
+
+dataCategory['education'] = [
+	"ged",
+	"community",
+	"university"
+];

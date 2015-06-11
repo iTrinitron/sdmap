@@ -7,6 +7,6 @@ function VerticalPane(id) {
 	
 	this.updateRName = function(name) {
 		this.rName = name;
-		$(id + " #name").html(name);
+		$("#name").html(name);
 	};
 }

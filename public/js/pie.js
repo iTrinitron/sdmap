@@ -1,5 +1,5 @@
 var w = 200;
-var h = 100;
+var h = 200;
 var r = 50; //radius
 var ir = 0; //inner-radius
 var textOffset = 14;
